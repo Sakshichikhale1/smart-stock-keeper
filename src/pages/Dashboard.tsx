@@ -1,9 +1,12 @@
 import { motion } from 'framer-motion';
-import { Package, ShoppingCart, DollarSign, AlertTriangle, TrendingUp, TrendingDown } from 'lucide-react';
+import { Package, ShoppingCart, DollarSign, AlertTriangle, TrendingUp, TrendingDown, IndianRupee, Boxes, ArrowUpRight } from 'lucide-react';
 import { useInventory } from '@/context/InventoryContext';
+import { formatINR } from '@/lib/currency';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
+import { Badge } from '@/components/ui/badge';
 
-const fade = { initial: { opacity: 0, y: 12 }, animate: { opacity: 1, y: 0 }, transition: { duration: 0.3 } };
+const container = { hidden: { opacity: 0 }, show: { opacity: 1, transition: { staggerChildren: 0.06 } } };
+const item = { hidden: { opacity: 0, y: 20, scale: 0.95 }, show: { opacity: 1, y: 0, scale: 1, transition: { type: "spring" as const, stiffness: 300, damping: 24 } } };
 
 export default function Dashboard() {
   const { products, orders, alerts } = useInventory();
@@ -12,6 +15,7 @@ export default function Dashboard() {
   const totalItems = products.reduce((s, p) => s + p.quantity, 0);
   const pendingOrders = orders.filter(o => o.status === 'pending').length;
   const activeAlerts = alerts.filter(a => !a.dismissed).length;
+  const completedOrders = orders.filter(o => o.status === 'completed').length;
 
   const categoryData = products.reduce((acc, p) => {
     const existing = acc.find(c => c.name === p.category);
@@ -24,93 +28,127 @@ export default function Dashboard() {
     value: Math.round(p.quantity * p.price),
   }));
 
-  const COLORS = ['hsl(217,91%,50%)', 'hsl(168,71%,39%)', 'hsl(38,92%,50%)', 'hsl(0,72%,51%)', 'hsl(280,65%,60%)'];
+  const COLORS = ['hsl(221,83%,53%)', 'hsl(162,63%,41%)', 'hsl(38,92%,50%)', 'hsl(0,72%,51%)', 'hsl(250,75%,60%)'];
 
   const stats = [
-    { label: 'Total Products', value: products.length, icon: Package, color: 'text-primary', bg: 'bg-primary/10' },
-    { label: 'Total Items', value: totalItems.toLocaleString(), icon: TrendingUp, color: 'text-accent', bg: 'bg-accent/10' },
-    { label: 'Inventory Value', value: `$${totalValue.toLocaleString(undefined, { minimumFractionDigits: 2 })}`, icon: DollarSign, color: 'text-success', bg: 'bg-success/10' },
-    { label: 'Pending Orders', value: pendingOrders, icon: ShoppingCart, color: 'text-warning', bg: 'bg-warning/10' },
-    { label: 'Active Alerts', value: activeAlerts, icon: AlertTriangle, color: 'text-destructive', bg: 'bg-destructive/10' },
+    { label: 'Total Products', value: String(products.length), icon: Package, gradient: 'from-primary to-[hsl(250,75%,60%)]', bg: 'bg-primary/10' },
+    { label: 'Total Items', value: totalItems.toLocaleString('en-IN'), icon: Boxes, gradient: 'from-accent to-[hsl(180,60%,50%)]', bg: 'bg-accent/10' },
+    { label: 'Inventory Value', value: formatINR(totalValue), icon: IndianRupee, gradient: 'from-success to-[hsl(160,60%,50%)]', bg: 'bg-success/10' },
+    { label: 'Pending Orders', value: String(pendingOrders), icon: ShoppingCart, gradient: 'from-warning to-[hsl(25,95%,53%)]', bg: 'bg-warning/10' },
+    { label: 'Active Alerts', value: String(activeAlerts), icon: AlertTriangle, gradient: 'from-destructive to-[hsl(350,80%,55%)]', bg: 'bg-destructive/10' },
   ];
 
   const lowStockProducts = products.filter(p => p.quantity <= p.reorderLevel).slice(0, 5);
 
   return (
-    <div className="space-y-6 max-w-7xl">
-      <motion.div {...fade}>
+    <div className="space-y-8 max-w-7xl">
+      <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }}>
         <h1 className="page-title">Dashboard</h1>
         <p className="page-subtitle">Overview of your inventory operations</p>
       </motion.div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
-        {stats.map((s, i) => (
-          <motion.div key={s.label} className="stat-card" initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05, duration: 0.3 }}>
-            <div className="flex items-center justify-between mb-3">
-              <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{s.label}</span>
-              <div className={`h-8 w-8 rounded-lg ${s.bg} flex items-center justify-center`}>
-                <s.icon className={`h-4 w-4 ${s.color}`} />
+      <motion.div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4" variants={container} initial="hidden" animate="show">
+        {stats.map((s) => (
+          <motion.div key={s.label} className="stat-card group relative overflow-hidden" variants={item}>
+            <div className={`absolute inset-0 bg-gradient-to-br ${s.gradient} opacity-0 group-hover:opacity-[0.03] transition-opacity duration-500`} />
+            <div className="flex items-center justify-between mb-3 relative">
+              <span className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">{s.label}</span>
+              <div className={`icon-box ${s.bg}`}>
+                <s.icon className={`h-4.5 w-4.5 bg-gradient-to-br ${s.gradient} bg-clip-text`} style={{ color: 'transparent', WebkitBackgroundClip: 'text', backgroundImage: `linear-gradient(135deg, var(--tw-gradient-from), var(--tw-gradient-to))` }} />
+                <s.icon className={`h-4 w-4 text-foreground/70`} />
               </div>
             </div>
-            <div className="text-2xl font-bold">{s.value}</div>
+            <motion.div className="text-2xl font-bold tracking-tight relative" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3, type: "spring", stiffness: 200 }}>
+              {s.value}
+            </motion.div>
           </motion.div>
         ))}
-      </div>
+      </motion.div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <motion.div className="stat-card" {...fade} transition={{ delay: 0.2 }}>
-          <h3 className="text-sm font-semibold mb-4">Top Products by Value</h3>
-          <ResponsiveContainer width="100%" height={220}>
-            <BarChart data={topProducts}>
-              <XAxis dataKey="name" tick={{ fontSize: 11 }} />
-              <YAxis tick={{ fontSize: 11 }} />
-              <Tooltip formatter={(v: number) => [`$${v.toLocaleString()}`, 'Value']} />
-              <Bar dataKey="value" fill="hsl(217,91%,50%)" radius={[4, 4, 0, 0]} />
+        <motion.div className="stat-card" initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.3, duration: 0.5 }}>
+          <div className="flex items-center justify-between mb-5">
+            <h3 className="text-sm font-semibold">Top Products by Value</h3>
+            <Badge variant="secondary" className="text-[10px] font-medium">INR</Badge>
+          </div>
+          <ResponsiveContainer width="100%" height={230}>
+            <BarChart data={topProducts} barCategoryGap="20%">
+              <XAxis dataKey="name" tick={{ fontSize: 10, fill: 'hsl(220,9%,46%)' }} axisLine={false} tickLine={false} />
+              <YAxis tick={{ fontSize: 10, fill: 'hsl(220,9%,46%)' }} axisLine={false} tickLine={false} />
+              <Tooltip formatter={(v: number) => [formatINR(v), 'Value']} contentStyle={{ borderRadius: '10px', border: '1px solid hsl(220,13%,91%)', boxShadow: '0 4px 12px rgba(0,0,0,0.08)' }} />
+              <defs>
+                <linearGradient id="barGradient" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="hsl(221,83%,53%)" />
+                  <stop offset="100%" stopColor="hsl(250,75%,60%)" />
+                </linearGradient>
+              </defs>
+              <Bar dataKey="value" fill="url(#barGradient)" radius={[6, 6, 0, 0]} animationDuration={1200} animationEasing="ease-out" />
             </BarChart>
           </ResponsiveContainer>
         </motion.div>
 
-        <motion.div className="stat-card" {...fade} transition={{ delay: 0.25 }}>
-          <h3 className="text-sm font-semibold mb-4">Stock by Category</h3>
-          <ResponsiveContainer width="100%" height={220}>
+        <motion.div className="stat-card" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.35, duration: 0.5 }}>
+          <div className="flex items-center justify-between mb-5">
+            <h3 className="text-sm font-semibold">Stock by Category</h3>
+            <Badge variant="secondary" className="text-[10px] font-medium">Units</Badge>
+          </div>
+          <ResponsiveContainer width="100%" height={200}>
             <PieChart>
-              <Pie data={categoryData} cx="50%" cy="50%" innerRadius={50} outerRadius={80} paddingAngle={4} dataKey="value">
+              <Pie data={categoryData} cx="50%" cy="50%" innerRadius={52} outerRadius={82} paddingAngle={4} dataKey="value" animationDuration={1000} animationEasing="ease-out">
                 {categoryData.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
               </Pie>
-              <Tooltip />
+              <Tooltip contentStyle={{ borderRadius: '10px', border: '1px solid hsl(220,13%,91%)', boxShadow: '0 4px 12px rgba(0,0,0,0.08)' }} />
             </PieChart>
           </ResponsiveContainer>
-          <div className="flex flex-wrap gap-3 justify-center mt-2">
+          <div className="flex flex-wrap gap-3 justify-center mt-3">
             {categoryData.map((c, i) => (
-              <div key={c.name} className="flex items-center gap-1.5 text-xs">
+              <motion.div key={c.name} className="flex items-center gap-1.5 text-xs font-medium" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.5 + i * 0.1 }}>
                 <div className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: COLORS[i % COLORS.length] }} />
-                {c.name}
-              </div>
+                {c.name} <span className="text-muted-foreground">({c.value})</span>
+              </motion.div>
             ))}
           </div>
         </motion.div>
       </div>
 
       {lowStockProducts.length > 0 && (
-        <motion.div className="stat-card" {...fade} transition={{ delay: 0.3 }}>
-          <div className="flex items-center gap-2 mb-4">
-            <TrendingDown className="h-4 w-4 text-destructive" />
-            <h3 className="text-sm font-semibold">Low Stock Items</h3>
+        <motion.div className="stat-card" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4, duration: 0.5 }}>
+          <div className="flex items-center gap-2.5 mb-5">
+            <div className="icon-box bg-destructive/10">
+              <TrendingDown className="h-4 w-4 text-destructive" />
+            </div>
+            <div>
+              <h3 className="text-sm font-semibold">Low Stock Items</h3>
+              <p className="text-[11px] text-muted-foreground">Products below reorder threshold</p>
+            </div>
           </div>
-          <div className="space-y-3">
-            {lowStockProducts.map(p => (
-              <div key={p.id} className="flex items-center justify-between py-2 border-b last:border-0">
-                <div>
-                  <span className="text-sm font-medium">{p.name}</span>
-                  <span className="text-xs text-muted-foreground ml-2">{p.sku}</span>
-                </div>
+          <div className="space-y-1">
+            {lowStockProducts.map((p, i) => (
+              <motion.div key={p.id} className="flex items-center justify-between py-3 px-3 rounded-lg hover:bg-muted/50 transition-all duration-200 border-b last:border-0" initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.5 + i * 0.06 }}>
                 <div className="flex items-center gap-3">
-                  <span className={`text-sm font-semibold ${p.quantity === 0 ? 'text-destructive' : 'text-warning'}`}>
-                    {p.quantity} units
-                  </span>
-                  <span className="text-xs text-muted-foreground">/ {p.reorderLevel} min</span>
+                  <div className={`h-2 w-2 rounded-full ${p.quantity === 0 ? 'bg-destructive animate-pulse' : 'bg-warning'}`} />
+                  <div>
+                    <span className="text-sm font-medium">{p.name}</span>
+                    <span className="text-[11px] text-muted-foreground ml-2">{p.sku}</span>
+                  </div>
                 </div>
-              </div>
+                <div className="flex items-center gap-4">
+                  <div className="text-right">
+                    <span className={`text-sm font-bold ${p.quantity === 0 ? 'text-destructive' : 'text-warning'}`}>
+                      {p.quantity}
+                    </span>
+                    <span className="text-[11px] text-muted-foreground"> / {p.reorderLevel}</span>
+                  </div>
+                  <div className="w-16 h-1.5 rounded-full bg-muted overflow-hidden">
+                    <motion.div 
+                      className={`h-full rounded-full ${p.quantity === 0 ? 'bg-destructive' : 'bg-warning'}`} 
+                      initial={{ width: 0 }} 
+                      animate={{ width: `${Math.min((p.quantity / p.reorderLevel) * 100, 100)}%` }}
+                      transition={{ delay: 0.6 + i * 0.06, duration: 0.8, ease: "easeOut" }}
+                    />
+                  </div>
+                </div>
+              </motion.div>
             ))}
           </div>
         </motion.div>

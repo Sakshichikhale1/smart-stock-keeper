@@ -2,20 +2,20 @@ import React, { createContext, useContext, useState, useCallback, ReactNode, use
 import { Product, Order, OrderItem, ActivityLog, Alert } from '@/types/inventory';
 
 const SAMPLE_PRODUCTS: Product[] = [
-  { id: '1', name: 'Wireless Mouse', sku: 'WM-001', category: 'Electronics', price: 29.99, costPrice: 15.00, quantity: 45, reorderLevel: 20, supplier: 'TechParts Inc', createdAt: '2025-01-15', updatedAt: '2025-04-10' },
-  { id: '2', name: 'USB-C Cable', sku: 'UC-002', category: 'Accessories', price: 12.99, costPrice: 4.50, quantity: 8, reorderLevel: 30, supplier: 'CableCo', createdAt: '2025-02-01', updatedAt: '2025-04-12' },
-  { id: '3', name: 'Mechanical Keyboard', sku: 'MK-003', category: 'Electronics', price: 89.99, costPrice: 45.00, quantity: 120, reorderLevel: 15, supplier: 'KeyTech', createdAt: '2025-01-20', updatedAt: '2025-04-08' },
-  { id: '4', name: 'Monitor Stand', sku: 'MS-004', category: 'Furniture', price: 49.99, costPrice: 22.00, quantity: 3, reorderLevel: 10, supplier: 'DeskPro', createdAt: '2025-03-01', updatedAt: '2025-04-11' },
-  { id: '5', name: 'Webcam HD', sku: 'WC-005', category: 'Electronics', price: 69.99, costPrice: 30.00, quantity: 62, reorderLevel: 20, supplier: 'TechParts Inc', createdAt: '2025-02-15', updatedAt: '2025-04-09' },
-  { id: '6', name: 'Desk Lamp', sku: 'DL-006', category: 'Furniture', price: 34.99, costPrice: 14.00, quantity: 0, reorderLevel: 10, supplier: 'LightWorks', createdAt: '2025-03-10', updatedAt: '2025-04-13' },
-  { id: '7', name: 'Notebook A5', sku: 'NB-007', category: 'Stationery', price: 5.99, costPrice: 1.50, quantity: 200, reorderLevel: 50, supplier: 'PaperHouse', createdAt: '2025-01-05', updatedAt: '2025-03-20' },
-  { id: '8', name: 'Ergonomic Chair', sku: 'EC-008', category: 'Furniture', price: 299.99, costPrice: 150.00, quantity: 12, reorderLevel: 5, supplier: 'DeskPro', createdAt: '2025-02-20', updatedAt: '2025-04-06' },
+  { id: '1', name: 'Wireless Mouse', sku: 'WM-001', category: 'Electronics', price: 2499, costPrice: 1250, quantity: 45, reorderLevel: 20, supplier: 'TechParts Inc', createdAt: '2025-01-15', updatedAt: '2025-04-10' },
+  { id: '2', name: 'USB-C Cable', sku: 'UC-002', category: 'Accessories', price: 1099, costPrice: 375, quantity: 8, reorderLevel: 30, supplier: 'CableCo', createdAt: '2025-02-01', updatedAt: '2025-04-12' },
+  { id: '3', name: 'Mechanical Keyboard', sku: 'MK-003', category: 'Electronics', price: 7499, costPrice: 3750, quantity: 120, reorderLevel: 15, supplier: 'KeyTech', createdAt: '2025-01-20', updatedAt: '2025-04-08' },
+  { id: '4', name: 'Monitor Stand', sku: 'MS-004', category: 'Furniture', price: 4199, costPrice: 1850, quantity: 3, reorderLevel: 10, supplier: 'DeskPro', createdAt: '2025-03-01', updatedAt: '2025-04-11' },
+  { id: '5', name: 'Webcam HD', sku: 'WC-005', category: 'Electronics', price: 5849, costPrice: 2500, quantity: 62, reorderLevel: 20, supplier: 'TechParts Inc', createdAt: '2025-02-15', updatedAt: '2025-04-09' },
+  { id: '6', name: 'Desk Lamp', sku: 'DL-006', category: 'Furniture', price: 2899, costPrice: 1150, quantity: 0, reorderLevel: 10, supplier: 'LightWorks', createdAt: '2025-03-10', updatedAt: '2025-04-13' },
+  { id: '7', name: 'Notebook A5', sku: 'NB-007', category: 'Stationery', price: 499, costPrice: 125, quantity: 200, reorderLevel: 50, supplier: 'PaperHouse', createdAt: '2025-01-05', updatedAt: '2025-03-20' },
+  { id: '8', name: 'Ergonomic Chair', sku: 'EC-008', category: 'Furniture', price: 24999, costPrice: 12500, quantity: 12, reorderLevel: 5, supplier: 'DeskPro', createdAt: '2025-02-20', updatedAt: '2025-04-06' },
 ];
 
 const SAMPLE_ORDERS: Order[] = [
-  { id: 'ORD-001', type: 'sales', status: 'completed', items: [{ productId: '1', productName: 'Wireless Mouse', quantity: 5, unitPrice: 29.99 }, { productId: '3', productName: 'Mechanical Keyboard', quantity: 2, unitPrice: 89.99 }], totalAmount: 329.93, createdAt: '2025-04-10', updatedAt: '2025-04-10' },
-  { id: 'ORD-002', type: 'purchase', status: 'pending', items: [{ productId: '2', productName: 'USB-C Cable', quantity: 50, unitPrice: 4.50 }], totalAmount: 225.00, createdAt: '2025-04-12', updatedAt: '2025-04-12' },
-  { id: 'ORD-003', type: 'sales', status: 'pending', items: [{ productId: '5', productName: 'Webcam HD', quantity: 10, unitPrice: 69.99 }], totalAmount: 699.90, createdAt: '2025-04-13', updatedAt: '2025-04-13' },
+  { id: 'ORD-001', type: 'sales', status: 'completed', items: [{ productId: '1', productName: 'Wireless Mouse', quantity: 5, unitPrice: 2499 }, { productId: '3', productName: 'Mechanical Keyboard', quantity: 2, unitPrice: 7499 }], totalAmount: 27493, createdAt: '2025-04-10', updatedAt: '2025-04-10' },
+  { id: 'ORD-002', type: 'purchase', status: 'pending', items: [{ productId: '2', productName: 'USB-C Cable', quantity: 50, unitPrice: 375 }], totalAmount: 18750, createdAt: '2025-04-12', updatedAt: '2025-04-12' },
+  { id: 'ORD-003', type: 'sales', status: 'pending', items: [{ productId: '5', productName: 'Webcam HD', quantity: 10, unitPrice: 5849 }], totalAmount: 58490, createdAt: '2025-04-13', updatedAt: '2025-04-13' },
 ];
 
 interface InventoryContextType {
@@ -101,7 +101,6 @@ export const InventoryProvider = ({ children }: { children: ReactNode }) => {
     const order: Order = { ...o, id: `ORD-${String(orders.length + 1).padStart(3, '0')}`, totalAmount: total, createdAt: now(), updatedAt: now() };
     setOrders(prev => [...prev, order]);
 
-    // Auto-update inventory
     if (o.type === 'sales') {
       setProducts(prev => prev.map(p => {
         const item = o.items.find(i => i.productId === p.id);
@@ -113,7 +112,7 @@ export const InventoryProvider = ({ children }: { children: ReactNode }) => {
         return item ? { ...p, quantity: p.quantity + item.quantity, updatedAt: now() } : p;
       }));
     }
-    addLog('Order Created', `${o.type} order created with ${o.items.length} items ($${total.toFixed(2)})`, 'order');
+    addLog('Order Created', `${o.type} order created with ${o.items.length} items (₹${total.toLocaleString('en-IN')})`, 'order');
   }, [orders.length, addLog]);
 
   const updateOrderStatus = useCallback((id: string, status: Order['status']) => {
