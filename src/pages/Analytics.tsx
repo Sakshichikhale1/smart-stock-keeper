@@ -8,7 +8,7 @@ import { IndianRupee, TrendingUp, Percent } from 'lucide-react';
 const COLORS = ['hsl(221,83%,53%)', 'hsl(162,63%,41%)', 'hsl(38,92%,50%)', 'hsl(0,72%,51%)', 'hsl(250,75%,60%)', 'hsl(190,80%,42%)'];
 
 const container = { hidden: { opacity: 0 }, show: { opacity: 1, transition: { staggerChildren: 0.08 } } };
-const item = { hidden: { opacity: 0, y: 16 }, show: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 250, damping: 22 } } };
+const item = { hidden: { opacity: 0, y: 16 }, show: { opacity: 1, y: 0, transition: { type: "spring" as const, stiffness: 250, damping: 22 } } };
 
 export default function Analytics() {
   const { products, orders } = useInventory();

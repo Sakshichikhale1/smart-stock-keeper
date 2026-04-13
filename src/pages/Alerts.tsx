@@ -6,7 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
 
 const container = { hidden: { opacity: 0 }, show: { opacity: 1, transition: { staggerChildren: 0.06 } } };
-const item = { hidden: { opacity: 0, x: -16, scale: 0.98 }, show: { opacity: 1, x: 0, scale: 1, transition: { type: "spring", stiffness: 250, damping: 22 } } };
+const item = { hidden: { opacity: 0, x: -16, scale: 0.98 }, show: { opacity: 1, x: 0, scale: 1, transition: { type: "spring" as const, stiffness: 250, damping: 22 } } };
 
 export default function Alerts() {
   const { alerts, dismissAlert, products, createOrder } = useInventory();
