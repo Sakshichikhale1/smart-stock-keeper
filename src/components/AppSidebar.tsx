@@ -1,4 +1,4 @@
-import { LayoutDashboard, Package, ShoppingCart, History, BarChart3, Bell, Clock, Bot } from 'lucide-react';
+import { LayoutDashboard, Package, ShoppingCart, History, BarChart3, Bell, Clock, Bot, Sparkles } from 'lucide-react';
 import { NavLink } from '@/components/NavLink';
 import { useInventory } from '@/context/InventoryContext';
 import {
@@ -24,7 +24,7 @@ const insightsNav = [
   { title: 'Analytics', url: '/analytics', icon: BarChart3 },
   { title: 'Alerts', url: '/alerts', icon: Bell },
   { title: 'Activity Log', url: '/activity', icon: Clock },
-  { title: 'AI Assistant', url: '/assistant', icon: Bot },
+  { title: 'AI Assistant', url: '/assistant', icon: Sparkles },
 ];
 
 export function AppSidebar() {
@@ -35,32 +35,35 @@ export function AppSidebar() {
 
   return (
     <Sidebar collapsible="icon" className="border-r-0">
-      <SidebarContent className="bg-sidebar pt-4">
-        <div className="px-4 mb-6">
+      <SidebarContent className="bg-sidebar pt-5">
+        <div className="px-4 mb-7">
           {!collapsed ? (
-            <div className="flex items-center gap-2">
-              <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center">
-                <Package className="h-4 w-4 text-primary-foreground" />
+            <div className="flex items-center gap-2.5">
+              <div className="h-9 w-9 rounded-xl bg-gradient-to-br from-primary to-[hsl(250,75%,60%)] flex items-center justify-center shadow-lg shadow-primary/20">
+                <Package className="h-4.5 w-4.5 text-primary-foreground" />
               </div>
-              <span className="text-lg font-semibold text-sidebar-accent-foreground">InvenPro</span>
+              <div>
+                <span className="text-base font-bold text-sidebar-accent-foreground tracking-tight">InvenPro</span>
+                <span className="text-[9px] text-sidebar-foreground/40 block -mt-0.5 uppercase tracking-widest">Inventory</span>
+              </div>
             </div>
           ) : (
-            <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center mx-auto">
-              <Package className="h-4 w-4 text-primary-foreground" />
+            <div className="h-9 w-9 rounded-xl bg-gradient-to-br from-primary to-[hsl(250,75%,60%)] flex items-center justify-center mx-auto shadow-lg shadow-primary/20">
+              <Package className="h-4.5 w-4.5 text-primary-foreground" />
             </div>
           )}
         </div>
 
         <SidebarGroup>
-          <SidebarGroupLabel className="text-sidebar-foreground/50 text-[10px] uppercase tracking-widest">{!collapsed && 'Main'}</SidebarGroupLabel>
+          <SidebarGroupLabel className="text-sidebar-foreground/40 text-[9px] uppercase tracking-[0.15em] font-semibold">{!collapsed && 'Main'}</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {mainNav.map(item => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild>
-                    <NavLink to={item.url} end={item.url === '/'} className="text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground" activeClassName="bg-sidebar-accent text-sidebar-primary font-medium">
-                      <item.icon className="h-4 w-4 mr-2 shrink-0" />
-                      {!collapsed && <span>{item.title}</span>}
+                    <NavLink to={item.url} end={item.url === '/'} className="text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-all duration-200 rounded-lg" activeClassName="bg-sidebar-accent text-sidebar-primary font-semibold">
+                      <item.icon className="h-4 w-4 mr-2.5 shrink-0" />
+                      {!collapsed && <span className="text-[13px]">{item.title}</span>}
                     </NavLink>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -70,17 +73,17 @@ export function AppSidebar() {
         </SidebarGroup>
 
         <SidebarGroup>
-          <SidebarGroupLabel className="text-sidebar-foreground/50 text-[10px] uppercase tracking-widest">{!collapsed && 'Insights'}</SidebarGroupLabel>
+          <SidebarGroupLabel className="text-sidebar-foreground/40 text-[9px] uppercase tracking-[0.15em] font-semibold">{!collapsed && 'Insights'}</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {insightsNav.map(item => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild>
-                    <NavLink to={item.url} className="text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground relative" activeClassName="bg-sidebar-accent text-sidebar-primary font-medium">
-                      <item.icon className="h-4 w-4 mr-2 shrink-0" />
-                      {!collapsed && <span>{item.title}</span>}
+                    <NavLink to={item.url} className="text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-all duration-200 rounded-lg relative" activeClassName="bg-sidebar-accent text-sidebar-primary font-semibold">
+                      <item.icon className="h-4 w-4 mr-2.5 shrink-0" />
+                      {!collapsed && <span className="text-[13px]">{item.title}</span>}
                       {item.title === 'Alerts' && activeAlerts > 0 && (
-                        <span className="absolute right-2 top-1/2 -translate-y-1/2 h-5 w-5 rounded-full bg-destructive text-destructive-foreground text-[10px] flex items-center justify-center font-medium">
+                        <span className="absolute right-2 top-1/2 -translate-y-1/2 h-5 min-w-[20px] px-1 rounded-full bg-destructive text-destructive-foreground text-[10px] flex items-center justify-center font-bold shadow-sm shadow-destructive/30">
                           {activeAlerts}
                         </span>
                       )}
