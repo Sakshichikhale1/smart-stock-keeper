@@ -3,8 +3,17 @@ import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import Index from "./pages/Index.tsx";
-import NotFound from "./pages/NotFound.tsx";
+import { InventoryProvider } from "@/context/InventoryContext";
+import { AppLayout } from "@/components/AppLayout";
+import Dashboard from "./pages/Dashboard";
+import Products from "./pages/Products";
+import Orders from "./pages/Orders";
+import OrderHistory from "./pages/OrderHistory";
+import Analytics from "./pages/Analytics";
+import Alerts from "./pages/Alerts";
+import ActivityLog from "./pages/ActivityLog";
+import AIAssistant from "./pages/AIAssistant";
+import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
 
@@ -14,11 +23,21 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Index />} />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
+        <InventoryProvider>
+          <AppLayout>
+            <Routes>
+              <Route path="/" element={<Dashboard />} />
+              <Route path="/products" element={<Products />} />
+              <Route path="/orders" element={<Orders />} />
+              <Route path="/history" element={<OrderHistory />} />
+              <Route path="/analytics" element={<Analytics />} />
+              <Route path="/alerts" element={<Alerts />} />
+              <Route path="/activity" element={<ActivityLog />} />
+              <Route path="/assistant" element={<AIAssistant />} />
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </AppLayout>
+        </InventoryProvider>
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>
