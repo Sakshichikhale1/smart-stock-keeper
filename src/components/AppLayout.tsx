@@ -1,12 +1,14 @@
 import { ReactNode } from 'react';
 import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
 import { AppSidebar } from '@/components/AppSidebar';
-import { Bell } from 'lucide-react';
+import { Bell, Moon, Sun } from 'lucide-react';
 import { useInventory } from '@/context/InventoryContext';
-import { Badge } from '@/components/ui/badge';
+import { useTheme } from '@/context/ThemeContext';
+import { Button } from '@/components/ui/button';
 
 export function AppLayout({ children }: { children: ReactNode }) {
   const { alerts } = useInventory();
+  const { theme, toggleTheme } = useTheme();
   const activeAlerts = alerts.filter(a => !a.dismissed).length;
 
   return (
@@ -16,7 +18,10 @@ export function AppLayout({ children }: { children: ReactNode }) {
         <div className="flex-1 flex flex-col min-w-0">
           <header className="h-14 flex items-center justify-between border-b bg-card/80 backdrop-blur-sm px-4 shrink-0 sticky top-0 z-10">
             <SidebarTrigger className="mr-4" />
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2">
+              <Button variant="ghost" size="icon" className="h-9 w-9 rounded-xl" onClick={toggleTheme}>
+                {theme === 'light' ? <Moon className="h-4 w-4 text-muted-foreground" /> : <Sun className="h-4 w-4 text-muted-foreground" />}
+              </Button>
               {activeAlerts > 0 && (
                 <div className="relative">
                   <Bell className="h-4.5 w-4.5 text-muted-foreground" />
