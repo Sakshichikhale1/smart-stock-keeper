@@ -1,16 +1,9 @@
-import { LayoutDashboard, Package, ShoppingCart, History, BarChart3, Bell, Clock, Bot, Sparkles } from 'lucide-react';
+import { LayoutDashboard, Package, ShoppingCart, History, BarChart3, Bell, Clock, Sparkles, Truck, Users } from 'lucide-react';
 import { NavLink } from '@/components/NavLink';
 import { useInventory } from '@/context/InventoryContext';
 import {
-  Sidebar,
-  SidebarContent,
-  SidebarGroup,
-  SidebarGroupContent,
-  SidebarGroupLabel,
-  SidebarMenu,
-  SidebarMenuButton,
-  SidebarMenuItem,
-  useSidebar,
+  Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGroupLabel,
+  SidebarMenu, SidebarMenuButton, SidebarMenuItem, useSidebar,
 } from '@/components/ui/sidebar';
 
 const mainNav = [
@@ -18,6 +11,11 @@ const mainNav = [
   { title: 'Products', url: '/products', icon: Package },
   { title: 'Orders', url: '/orders', icon: ShoppingCart },
   { title: 'Order History', url: '/history', icon: History },
+];
+
+const managementNav = [
+  { title: 'Suppliers', url: '/suppliers', icon: Truck },
+  { title: 'Customers', url: '/customers', icon: Users },
 ];
 
 const insightsNav = [
@@ -32,6 +30,26 @@ export function AppSidebar() {
   const collapsed = state === 'collapsed';
   const { alerts } = useInventory();
   const activeAlerts = alerts.filter(a => !a.dismissed).length;
+
+  const renderNav = (items: typeof mainNav) => (
+    <SidebarMenu>
+      {items.map(item => (
+        <SidebarMenuItem key={item.title}>
+          <SidebarMenuButton asChild>
+            <NavLink to={item.url} end={item.url === '/'} className="text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-all duration-200 rounded-xl" activeClassName="bg-sidebar-accent text-sidebar-primary font-semibold">
+              <item.icon className="h-4 w-4 mr-2.5 shrink-0" />
+              {!collapsed && <span className="text-[13px]">{item.title}</span>}
+              {item.title === 'Alerts' && activeAlerts > 0 && (
+                <span className="absolute right-2 top-1/2 -translate-y-1/2 h-5 min-w-[20px] px-1 rounded-full bg-destructive text-destructive-foreground text-[10px] flex items-center justify-center font-bold shadow-sm shadow-destructive/30">
+                  {activeAlerts}
+                </span>
+              )}
+            </NavLink>
+          </SidebarMenuButton>
+        </SidebarMenuItem>
+      ))}
+    </SidebarMenu>
+  );
 
   return (
     <Sidebar collapsible="icon" className="border-r-0">
@@ -56,43 +74,17 @@ export function AppSidebar() {
 
         <SidebarGroup>
           <SidebarGroupLabel className="text-sidebar-foreground/40 text-[9px] uppercase tracking-[0.15em] font-semibold">{!collapsed && 'Main'}</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {mainNav.map(item => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild>
-                    <NavLink to={item.url} end={item.url === '/'} className="text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-all duration-200 rounded-lg" activeClassName="bg-sidebar-accent text-sidebar-primary font-semibold">
-                      <item.icon className="h-4 w-4 mr-2.5 shrink-0" />
-                      {!collapsed && <span className="text-[13px]">{item.title}</span>}
-                    </NavLink>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
+          <SidebarGroupContent>{renderNav(mainNav)}</SidebarGroupContent>
+        </SidebarGroup>
+
+        <SidebarGroup>
+          <SidebarGroupLabel className="text-sidebar-foreground/40 text-[9px] uppercase tracking-[0.15em] font-semibold">{!collapsed && 'Management'}</SidebarGroupLabel>
+          <SidebarGroupContent>{renderNav(managementNav)}</SidebarGroupContent>
         </SidebarGroup>
 
         <SidebarGroup>
           <SidebarGroupLabel className="text-sidebar-foreground/40 text-[9px] uppercase tracking-[0.15em] font-semibold">{!collapsed && 'Insights'}</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {insightsNav.map(item => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild>
-                    <NavLink to={item.url} className="text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-all duration-200 rounded-lg relative" activeClassName="bg-sidebar-accent text-sidebar-primary font-semibold">
-                      <item.icon className="h-4 w-4 mr-2.5 shrink-0" />
-                      {!collapsed && <span className="text-[13px]">{item.title}</span>}
-                      {item.title === 'Alerts' && activeAlerts > 0 && (
-                        <span className="absolute right-2 top-1/2 -translate-y-1/2 h-5 min-w-[20px] px-1 rounded-full bg-destructive text-destructive-foreground text-[10px] flex items-center justify-center font-bold shadow-sm shadow-destructive/30">
-                          {activeAlerts}
-                        </span>
-                      )}
-                    </NavLink>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
+          <SidebarGroupContent>{renderNav(insightsNav)}</SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
     </Sidebar>

@@ -1,5 +1,5 @@
 import { motion, AnimatePresence } from 'framer-motion';
-import { AlertTriangle, XCircle, Package, Zap, ShieldCheck } from 'lucide-react';
+import { AlertTriangle, XCircle, ShieldCheck, Zap } from 'lucide-react';
 import { useInventory } from '@/context/InventoryContext';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -18,9 +18,9 @@ export default function Alerts() {
     if (!p) return;
     const qty = Math.max(p.reorderLevel * 2 - p.quantity, 10);
     createOrder({
-      type: 'purchase',
-      status: 'pending',
-      items: [{ productId: p.id, productName: p.name, quantity: qty, unitPrice: p.costPrice }],
+      type: 'purchase', status: 'pending', isInterState: false,
+      gstBreakdown: { taxableAmount: qty * p.costPrice, cgst: qty * p.costPrice * p.gstRate / 200, sgst: qty * p.costPrice * p.gstRate / 200, igst: 0, totalTax: qty * p.costPrice * p.gstRate / 100, totalWithTax: qty * p.costPrice * (1 + p.gstRate / 100), isInterState: false },
+      items: [{ productId: p.id, productName: p.name, quantity: qty, unitPrice: p.costPrice, costPrice: p.costPrice, gstRate: p.gstRate, hsnCode: p.hsnCode }],
       notes: `Auto-generated reorder for ${p.name}`,
     });
     toast.success(`Purchase order created for ${qty} units of ${p.name}! 📦`);
