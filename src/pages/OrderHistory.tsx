@@ -1,10 +1,11 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, X, History, FileText } from 'lucide-react';
+import { Search, X, FileText, FileDown } from 'lucide-react';
 import { useInventory } from '@/context/InventoryContext';
 import { formatINR } from '@/lib/currency';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
@@ -27,11 +28,27 @@ export default function OrderHistory() {
     return 'bg-warning/15 text-warning border-warning/20';
   };
 
+  const exportCSV = () => {
+    const headers = ['Order ID', 'Type', 'Status', 'Items', 'Taxable', 'GST', 'Total', 'Customer/Supplier', 'Date'];
+    const rows = filtered.map(o => [
+      o.id, o.type, o.status,
+      o.items.map(i => `${i.productName}(x${i.quantity})`).join('; '),
+      o.gstBreakdown.taxableAmount, o.gstBreakdown.totalTax, o.totalAmount,
+      o.customerName || o.supplierName || '-', o.createdAt,
+    ]);
+    const csv = [headers, ...rows].map(r => r.map(v => `"${v}"`).join(',')).join('\n');
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = 'order-history.csv'; a.click();
+    URL.revokeObjectURL(url);
+  };
+
   return (
     <div className="space-y-6 max-w-7xl">
       <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }}>
         <h1 className="page-title">Order History</h1>
-        <p className="page-subtitle">View and filter past orders</p>
+        <p className="page-subtitle">View and filter past orders with GST details</p>
       </motion.div>
 
       <motion.div className="flex flex-col sm:flex-row gap-3" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.15 }}>
@@ -57,15 +74,21 @@ export default function OrderHistory() {
             <SelectItem value="cancelled">Cancelled</SelectItem>
           </SelectContent>
         </Select>
+        <Button variant="outline" onClick={exportCSV} className="gap-2 h-10">
+          <FileDown className="h-4 w-4" /> Export
+        </Button>
       </motion.div>
 
       <motion.div className="bg-card rounded-xl border overflow-hidden" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} style={{ boxShadow: 'var(--shadow-card)' }}>
         <Table>
-          <TableHeader>
+          <TableHeader className="sticky-header">
             <TableRow className="bg-muted/30">
               <TableHead className="table-header">Order ID</TableHead>
               <TableHead className="table-header">Type</TableHead>
+              <TableHead className="table-header">Customer/Supplier</TableHead>
               <TableHead className="table-header">Items</TableHead>
+              <TableHead className="table-header text-right">Taxable</TableHead>
+              <TableHead className="table-header text-right">GST</TableHead>
               <TableHead className="table-header text-right">Total</TableHead>
               <TableHead className="table-header">Status</TableHead>
               <TableHead className="table-header">Date</TableHead>
@@ -77,7 +100,13 @@ export default function OrderHistory() {
                 <motion.tr key={o.id} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} transition={{ delay: i * 0.04 }} className="border-b hover:bg-muted/30 transition-colors">
                   <TableCell className="font-semibold text-sm">{o.id}</TableCell>
                   <TableCell><Badge variant="secondary" className={`text-[10px] capitalize font-medium ${o.type === 'sales' ? 'bg-accent/10 text-accent' : 'bg-primary/10 text-primary'}`}>{o.type}</Badge></TableCell>
+                  <TableCell className="text-sm">{o.customerName || o.supplierName || '-'}</TableCell>
                   <TableCell className="text-sm text-muted-foreground max-w-[200px] truncate">{o.items.map(i => `${i.productName} (×${i.quantity})`).join(', ')}</TableCell>
+                  <TableCell className="text-right tabular-nums text-sm">{formatINR(o.gstBreakdown.taxableAmount)}</TableCell>
+                  <TableCell className="text-right tabular-nums text-sm text-muted-foreground">
+                    {formatINR(o.gstBreakdown.totalTax)}
+                    <div className="text-[10px]">{o.isInterState ? 'IGST' : 'CGST+SGST'}</div>
+                  </TableCell>
                   <TableCell className="text-right font-semibold tabular-nums">{formatINR(o.totalAmount)}</TableCell>
                   <TableCell><Badge className={`text-[10px] capitalize ${statusColor(o.status)}`}>{o.status}</Badge></TableCell>
                   <TableCell className="text-sm text-muted-foreground">{o.createdAt}</TableCell>
@@ -85,9 +114,10 @@ export default function OrderHistory() {
               ))}
             </AnimatePresence>
             {filtered.length === 0 && (
-              <TableRow><TableCell colSpan={6} className="text-center py-12 text-muted-foreground">
-                <FileText className="h-10 w-10 mx-auto mb-2 text-muted-foreground/30" />
-                No orders found
+              <TableRow><TableCell colSpan={9} className="text-center py-16 text-muted-foreground">
+                <FileText className="h-12 w-12 mx-auto mb-3 text-muted-foreground/20" />
+                <p className="font-medium mb-1">No orders found</p>
+                <p className="text-sm">Try adjusting your filters</p>
               </TableCell></TableRow>
             )}
           </TableBody>
