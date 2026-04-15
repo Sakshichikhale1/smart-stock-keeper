@@ -211,6 +211,3 @@ export default function Analytics() {
     </div>
   );
 }
-
-// Need Receipt icon
-import { Receipt } from 'lucide-react';
