@@ -8,8 +8,36 @@ export interface Product {
   quantity: number;
   reorderLevel: number;
   supplier: string;
+  hsnCode?: string;
+  gstRate: number; // 0, 5, 12, 18, 28
   createdAt: string;
   updatedAt: string;
+}
+
+export interface Supplier {
+  id: string;
+  name: string;
+  gstin?: string;
+  contactPerson: string;
+  email: string;
+  phone: string;
+  address: string;
+  city: string;
+  state: string;
+  createdAt: string;
+}
+
+export interface Customer {
+  id: string;
+  name: string;
+  gstin?: string;
+  contactPerson: string;
+  email: string;
+  phone: string;
+  address: string;
+  city: string;
+  state: string;
+  createdAt: string;
 }
 
 export interface OrderItem {
@@ -17,6 +45,19 @@ export interface OrderItem {
   productName: string;
   quantity: number;
   unitPrice: number;
+  costPrice: number;
+  gstRate: number;
+  hsnCode?: string;
+}
+
+export interface GSTBreakdown {
+  taxableAmount: number;
+  cgst: number;
+  sgst: number;
+  igst: number;
+  totalTax: number;
+  totalWithTax: number;
+  isInterState: boolean;
 }
 
 export interface Order {
@@ -25,6 +66,12 @@ export interface Order {
   status: 'pending' | 'completed' | 'cancelled';
   items: OrderItem[];
   totalAmount: number;
+  gstBreakdown: GSTBreakdown;
+  customerId?: string;
+  customerName?: string;
+  supplierId?: string;
+  supplierName?: string;
+  isInterState: boolean;
   createdAt: string;
   updatedAt: string;
   notes?: string;
