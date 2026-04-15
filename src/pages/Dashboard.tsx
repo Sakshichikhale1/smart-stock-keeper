@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { Package, ShoppingCart, DollarSign, AlertTriangle, TrendingUp, TrendingDown, IndianRupee, Boxes, ArrowUpRight } from 'lucide-react';
+import { Package, ShoppingCart, AlertTriangle, TrendingDown, IndianRupee, Boxes, TrendingUp, Receipt } from 'lucide-react';
 import { useInventory } from '@/context/InventoryContext';
 import { formatINR } from '@/lib/currency';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
@@ -15,7 +15,12 @@ export default function Dashboard() {
   const totalItems = products.reduce((s, p) => s + p.quantity, 0);
   const pendingOrders = orders.filter(o => o.status === 'pending').length;
   const activeAlerts = alerts.filter(a => !a.dismissed).length;
-  const completedOrders = orders.filter(o => o.status === 'completed').length;
+  
+  const salesOrders = orders.filter(o => o.type === 'sales');
+  const totalRevenue = salesOrders.reduce((s, o) => s + o.gstBreakdown.taxableAmount, 0);
+  const totalCost = salesOrders.flatMap(o => o.items).reduce((s, i) => s + i.costPrice * i.quantity, 0);
+  const totalProfit = totalRevenue - totalCost;
+  const totalGST = orders.reduce((s, o) => s + o.gstBreakdown.totalTax, 0);
 
   const categoryData = products.reduce((acc, p) => {
     const existing = acc.find(c => c.name === p.category);
@@ -32,13 +37,15 @@ export default function Dashboard() {
 
   const stats = [
     { label: 'Total Products', value: String(products.length), icon: Package, gradient: 'from-primary to-[hsl(250,75%,60%)]', bg: 'bg-primary/10' },
-    { label: 'Total Items', value: totalItems.toLocaleString('en-IN'), icon: Boxes, gradient: 'from-accent to-[hsl(180,60%,50%)]', bg: 'bg-accent/10' },
     { label: 'Inventory Value', value: formatINR(totalValue), icon: IndianRupee, gradient: 'from-success to-[hsl(160,60%,50%)]', bg: 'bg-success/10' },
-    { label: 'Pending Orders', value: String(pendingOrders), icon: ShoppingCart, gradient: 'from-warning to-[hsl(25,95%,53%)]', bg: 'bg-warning/10' },
+    { label: 'Total Profit', value: formatINR(totalProfit), icon: TrendingUp, gradient: 'from-accent to-[hsl(180,60%,50%)]', bg: 'bg-accent/10' },
+    { label: 'GST Collected', value: formatINR(totalGST), icon: Receipt, gradient: 'from-warning to-[hsl(25,95%,53%)]', bg: 'bg-warning/10' },
     { label: 'Active Alerts', value: String(activeAlerts), icon: AlertTriangle, gradient: 'from-destructive to-[hsl(350,80%,55%)]', bg: 'bg-destructive/10' },
   ];
 
   const lowStockProducts = products.filter(p => p.quantity <= p.reorderLevel).slice(0, 5);
+
+  const tooltipStyle = { borderRadius: '12px', border: '1px solid hsl(var(--border))', boxShadow: '0 4px 12px rgba(0,0,0,0.08)', backgroundColor: 'hsl(var(--card))' };
 
   return (
     <div className="space-y-8 max-w-7xl">
@@ -54,8 +61,7 @@ export default function Dashboard() {
             <div className="flex items-center justify-between mb-3 relative">
               <span className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">{s.label}</span>
               <div className={`icon-box ${s.bg}`}>
-                <s.icon className={`h-4.5 w-4.5 bg-gradient-to-br ${s.gradient} bg-clip-text`} style={{ color: 'transparent', WebkitBackgroundClip: 'text', backgroundImage: `linear-gradient(135deg, var(--tw-gradient-from), var(--tw-gradient-to))` }} />
-                <s.icon className={`h-4 w-4 text-foreground/70`} />
+                <s.icon className="h-4 w-4 text-foreground/70" />
               </div>
             </div>
             <motion.div className="text-2xl font-bold tracking-tight relative" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3, type: "spring", stiffness: 200 }}>
@@ -73,16 +79,16 @@ export default function Dashboard() {
           </div>
           <ResponsiveContainer width="100%" height={230}>
             <BarChart data={topProducts} barCategoryGap="20%">
-              <XAxis dataKey="name" tick={{ fontSize: 10, fill: 'hsl(220,9%,46%)' }} axisLine={false} tickLine={false} />
-              <YAxis tick={{ fontSize: 10, fill: 'hsl(220,9%,46%)' }} axisLine={false} tickLine={false} />
-              <Tooltip formatter={(v: number) => [formatINR(v), 'Value']} contentStyle={{ borderRadius: '10px', border: '1px solid hsl(220,13%,91%)', boxShadow: '0 4px 12px rgba(0,0,0,0.08)' }} />
+              <XAxis dataKey="name" tick={{ fontSize: 10, fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false} />
+              <YAxis tick={{ fontSize: 10, fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false} />
+              <Tooltip formatter={(v: number) => [formatINR(v), 'Value']} contentStyle={tooltipStyle} />
               <defs>
                 <linearGradient id="barGradient" x1="0" y1="0" x2="0" y2="1">
                   <stop offset="0%" stopColor="hsl(221,83%,53%)" />
                   <stop offset="100%" stopColor="hsl(250,75%,60%)" />
                 </linearGradient>
               </defs>
-              <Bar dataKey="value" fill="url(#barGradient)" radius={[6, 6, 0, 0]} animationDuration={1200} animationEasing="ease-out" />
+              <Bar dataKey="value" fill="url(#barGradient)" radius={[8, 8, 0, 0]} animationDuration={1200} animationEasing="ease-out" />
             </BarChart>
           </ResponsiveContainer>
         </motion.div>
@@ -97,7 +103,7 @@ export default function Dashboard() {
               <Pie data={categoryData} cx="50%" cy="50%" innerRadius={52} outerRadius={82} paddingAngle={4} dataKey="value" animationDuration={1000} animationEasing="ease-out">
                 {categoryData.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
               </Pie>
-              <Tooltip contentStyle={{ borderRadius: '10px', border: '1px solid hsl(220,13%,91%)', boxShadow: '0 4px 12px rgba(0,0,0,0.08)' }} />
+              <Tooltip contentStyle={tooltipStyle} />
             </PieChart>
           </ResponsiveContainer>
           <div className="flex flex-wrap gap-3 justify-center mt-3">
@@ -124,7 +130,7 @@ export default function Dashboard() {
           </div>
           <div className="space-y-1">
             {lowStockProducts.map((p, i) => (
-              <motion.div key={p.id} className="flex items-center justify-between py-3 px-3 rounded-lg hover:bg-muted/50 transition-all duration-200 border-b last:border-0" initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.5 + i * 0.06 }}>
+              <motion.div key={p.id} className="flex items-center justify-between py-3 px-3 rounded-xl hover:bg-muted/50 transition-all duration-200 border-b last:border-0" initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.5 + i * 0.06 }}>
                 <div className="flex items-center gap-3">
                   <div className={`h-2 w-2 rounded-full ${p.quantity === 0 ? 'bg-destructive animate-pulse' : 'bg-warning'}`} />
                   <div>
@@ -140,9 +146,9 @@ export default function Dashboard() {
                     <span className="text-[11px] text-muted-foreground"> / {p.reorderLevel}</span>
                   </div>
                   <div className="w-16 h-1.5 rounded-full bg-muted overflow-hidden">
-                    <motion.div 
-                      className={`h-full rounded-full ${p.quantity === 0 ? 'bg-destructive' : 'bg-warning'}`} 
-                      initial={{ width: 0 }} 
+                    <motion.div
+                      className={`h-full rounded-full ${p.quantity === 0 ? 'bg-destructive' : 'bg-warning'}`}
+                      initial={{ width: 0 }}
                       animate={{ width: `${Math.min((p.quantity / p.reorderLevel) * 100, 100)}%` }}
                       transition={{ delay: 0.6 + i * 0.06, duration: 0.8, ease: "easeOut" }}
                     />
