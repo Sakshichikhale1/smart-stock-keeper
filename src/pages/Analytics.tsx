@@ -3,7 +3,7 @@ import { useInventory } from '@/context/InventoryContext';
 import { formatINR } from '@/lib/currency';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, AreaChart, Area, LineChart, Line } from 'recharts';
 import { Badge } from '@/components/ui/badge';
-import { IndianRupee, TrendingUp, Percent, Target, Clock, ArrowUpDown } from 'lucide-react';
+import { IndianRupee, TrendingUp, Percent, Target, Clock, ArrowUpDown, Receipt } from 'lucide-react';
 
 const COLORS = ['hsl(221,83%,53%)', 'hsl(162,63%,41%)', 'hsl(38,92%,50%)', 'hsl(0,72%,51%)', 'hsl(250,75%,60%)', 'hsl(190,80%,42%)'];
 
